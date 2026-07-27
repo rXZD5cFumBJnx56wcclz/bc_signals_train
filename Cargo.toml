@@ -7,6 +7,8 @@ edition = "2024"
 bc_utils_lg ={ path = "../bc_utils_lg" }
 bc_utils = {path = "../bc_utils"}
 
+dyn-clone = "1"
+
 [dev-dependencies]
 bc_test_kit = {path = "../bc_test_kit"}
 

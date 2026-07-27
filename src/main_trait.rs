@@ -1,5 +1,7 @@
 use std::any::Any;
 
+use dyn_clone::DynClone;
+
 fn signal_coll<C, T>(signal_struct: &T, src: &[Vec<f64>]) -> C
 where
     C: FromIterator<f64>,
@@ -19,7 +21,7 @@ where
         .collect()
 }
 
-pub trait SignalTrain: Any {
+pub trait SignalTrain: Any + DynClone {
     fn w(&self) -> usize;
     fn init_bf(&self, src: &[Vec<f64>]);
     fn execute_bf(&self);
@@ -35,6 +37,8 @@ pub trait SignalTrain: Any {
         signal_coll(self, src)
     }
 }
+
+dyn_clone::clone_trait_object!(SignalTrain);
 
 pub trait SignalTrainExt: SignalTrain {
     fn signal_coll<C>(&self, src: &[Vec<f64>]) -> C
