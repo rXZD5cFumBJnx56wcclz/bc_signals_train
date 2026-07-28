@@ -98,10 +98,13 @@ impl MM {
     }
 }
 
-impl SignalTrain for MM {
+impl W for MM {
     fn w(&self) -> usize {
         self.params.window + 1
     }
+}
+
+impl SignalTrain for MM {
     fn init_bf(&self, src: &[Vec<f64>]) {
         self.bf.borrow_mut().src_l = src[src.len() - self.params.window..].to_vec();
     }
