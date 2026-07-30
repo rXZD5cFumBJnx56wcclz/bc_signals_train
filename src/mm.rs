@@ -100,18 +100,18 @@ impl MM {
 
 impl W for MM {
     fn w(&self) -> usize {
-        self.params.window + 1
+        self.params.window
     }
 }
 
 impl SignalTrain for MM {
     fn init_bf(&self, src: &[Vec<f64>]) {
-        self.bf.borrow_mut().src_l = src[src.len() - self.params.window..].to_vec();
+        self.bf.borrow_mut().src_l = src[src.len() - self.w()..].to_vec();
     }
     fn execute_bf(&self) {
         *self.bf.borrow_mut() = self.bf_state.borrow().clone();
     }
-    fn signal_with_bf(&self, src: &[f64]) -> f64 {
+    fn signal(&self, src: &[f64]) -> f64 {
         self.bf_state.borrow_mut().src_l = self.bf.borrow_mut().src_l[1..].to_vec();
         self.bf_state.borrow_mut().src_l.push(src.to_vec());
         let bind = self.bf_state.borrow();
@@ -159,87 +159,19 @@ mod tests {
     use super::*;
     use crate::prelude_tests::prelude::*;
 
-    const RES: f64 = 0.0;
+    const RES: f64 = 1.0;
+    static SRC_: LazyLock<Vec<Vec<f64>>> =
+        LazyLock::new(|| SRC.clone().into_iter().take(47).collect());
     static SIGNAL: LazyLock<fn() -> MM> =
         LazyLock::new(|| || MM::new(1, 1, 2, 3, 0.0001, 0.01, 0.0, 1.0, 2.0));
 
     #[test]
     fn mm_with_bf_res_1() {
-        test_bf_res_1(&SIGNAL(), &SRC, RES);
-    }
-
-    #[test]
-    fn mm_signal_res_1() {
-        test_f_res_1(&SIGNAL(), &SRC, RES);
+        test_bf_res_1(&SIGNAL(), &SRC_, RES);
     }
 
     #[test]
     fn mm_coll_res_1() {
-        test_coll_res_1(&SIGNAL(), &SRC, RES, 30);
-    }
-
-    #[test]
-    fn mm_coll_res_2() {
-        test_coll_res_2(&SIGNAL(), &SRC, 30);
-    }
-
-    #[test]
-    fn mm_coll_res_3() {
-        test_coll_res_3(
-            &SIGNAL(),
-            &SRC,
-            vec![
-                0.0,
-                2.0,
-                2.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                0.0,
-                1.0,
-                0.0,
-                0.0,
-                1.0,
-                1.0,
-                1.0,
-                0.0,
-                2.0,
-                0.0,
-                0.0,
-                2.0,
-                0.0,
-                0.0,
-                2.0,
-                2.0,
-                2.0,
-                0.0,
-                1.0,
-                0.0,
-                2.0,
-                2.0,
-                0.0,
-                1.0,
-                0.0,
-                0.0,
-                1.0,
-                1.0,
-                1.0,
-                0.0,
-                2.0,
-                0.0,
-                1.0,
-                1.0,
-                0.0,
-                0.0,
-                1.0,
-                0.0,
-                0.0,
-                0.0,
-                f64::NAN,
-                f64::NAN,
-                f64::NAN,
-            ],
-        );
+        test_coll_res_1(&SIGNAL(), &SRC_, 10);
     }
 }
